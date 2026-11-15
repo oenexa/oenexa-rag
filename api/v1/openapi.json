@@ -1,0 +1,115 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OENEXA Enterprise RAG & Vector Knowledge API",
+    "version": "1.0.0",
+    "description": "Tenant-isolated document ingestion, 256-dimensional semantic vector embeddings, and hybrid cosine search."
+  },
+  "servers": [
+    {
+      "url": "https://app.oenexa.com/api/rag",
+      "description": "RAG Knowledge Gateway Route"
+    }
+  ],
+  "paths": {
+    "/v1/documents": {
+      "post": {
+        "summary": "Ingest and Vectorize Document",
+        "operationId": "ingestDocument",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentIngestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Document ingested and vectorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentChunk"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/query": {
+      "post": {
+        "summary": "Semantic Hybrid Search Across Knowledge Base",
+        "operationId": "searchKnowledge",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchQueryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results with similarity ranking",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SearchResult"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DocumentIngestRequest": {
+        "type": "object",
+        "properties": {
+          "documentId": { "type": "string" },
+          "title": { "type": "string" },
+          "content": { "type": "string" }
+        },
+        "required": ["documentId", "title", "content"]
+      },
+      "DocumentChunk": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "documentId": { "type": "string" },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "vector": { "type": "array", "items": { "type": "number" } }
+        },
+        "required": ["id", "documentId", "title", "content", "vector"]
+      },
+      "SearchQueryRequest": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "topK": { "type": "integer", "default": 5 }
+        },
+        "required": ["query"]
+      },
+      "SearchResult": {
+        "type": "object",
+        "properties": {
+          "chunk": { "$ref": "#/components/schemas/DocumentChunk" },
+          "similarity": { "type": "number" }
+        },
+        "required": ["chunk", "similarity"]
+      }
+    }
+  }
+}
